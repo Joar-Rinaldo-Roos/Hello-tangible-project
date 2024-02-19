@@ -92,12 +92,9 @@ public class GameView extends SurfaceView implements Runnable {
 
     private void update () {
 
-
-
-
         if (flight.isGoingUp)
             flight.y -= 30 * screenRatioY;
-        else
+        else if (flight.isGoingDown)
             flight.y += 30 * screenRatioY;
 
         if (flight.y < 0)
