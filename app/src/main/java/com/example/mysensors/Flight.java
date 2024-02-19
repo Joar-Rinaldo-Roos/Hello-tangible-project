@@ -11,13 +11,12 @@ import static com.example.mysensors.GameView.screenRatioY;
 public class Flight {
 
     int toShoot = 0;
-    boolean isGoingUp = false;
+    boolean isGoingUp = false, isGoingDown = false, isGoingLeft = false, isGoingRight = false;
     int x, y, width, height, wingCounter = 0, shootCounter = 1;
     Bitmap flight1, flight2, shoot1, shoot2, shoot3, shoot4, shoot5, dead;
     private GameView gameView;
 
-    Flight (GameView gameView, int screenY, Resources res) {
-
+    Flight(GameView gameView, int screenY, Resources res) {
         this.gameView = gameView;
 
         flight1 = BitmapFactory.decodeResource(res, R.drawable.fly1);
@@ -52,39 +51,23 @@ public class Flight {
 
         y = screenY / 2;
         x = (int) (64 * screenRatioX);
+}
 
+    void update() {
+        if (isGoingUp) y -= 3 * screenRatioY; // Example movement speed, adjust as needed
+        if (isGoingDown) y += 3 * screenRatioY;
+        if (isGoingLeft) x -= 3 * screenRatioX;
+        if (isGoingRight) x += 3 * screenRatioX;
+
+        // Ensure the flight does not move out of the screen
+        x = Math.max(x, 0); // Prevent moving beyond the left edge
+        x = Math.min(x, gameView.getWidth() - width); // Prevent moving beyond the right edge
+        y = Math.max(y, 0); // Prevent moving beyond the top edge
+        y = Math.min(y, gameView.getHeight() - height); // Prevent moving beyond the bottom edge
     }
 
     Bitmap getFlight () {
 
-        if (toShoot != 0) {
-
-            if (shootCounter == 1) {
-                shootCounter++;
-                return shoot1;
-            }
-
-            if (shootCounter == 2) {
-                shootCounter++;
-                return shoot2;
-            }
-
-            if (shootCounter == 3) {
-                shootCounter++;
-                return shoot3;
-            }
-
-            if (shootCounter == 4) {
-                shootCounter++;
-                return shoot4;
-            }
-
-            shootCounter = 1;
-            toShoot--;
-            gameView.newBullet();
-
-            return shoot5;
-        }
 
         if (wingCounter == 0) {
             wingCounter++;
@@ -94,12 +77,11 @@ public class Flight {
 
         return flight2;
     }
-
-    Rect getCollisionShape () {
+    Rect getCollisionShape() {
         return new Rect(x, y, x + width, y + height);
     }
 
-    Bitmap getDead () {
+    Bitmap getDead() {
         return dead;
     }
 
