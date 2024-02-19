@@ -3,14 +3,17 @@ package com.example.mysensors;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.SoundPool;
 import android.os.Build;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceView;
 
@@ -91,7 +94,8 @@ public class GameView extends SurfaceView implements Runnable {
     }
 
     private void update () {
-
+        flight.update();
+        /*
         if (flight.isGoingUp)
             flight.y -= 30 * screenRatioY;
         else if (flight.isGoingDown)
@@ -108,6 +112,7 @@ public class GameView extends SurfaceView implements Runnable {
         else if (flight.isGoingRight)
             flight.x += 30 * screenRatioX;
         flight.x = Math.max(0, Math.min(flight.x, screenX - flight.width));
+        */
     }
 
     private void draw () {
@@ -129,7 +134,14 @@ public class GameView extends SurfaceView implements Runnable {
                 return;
             }
 
-            canvas.drawBitmap(flight.getFlight(), flight.x, flight.y, paint);
+            float flightRotation = (float)Math.toDegrees(Math.atan2(flight.lastVelocityY, flight.lastVelocityX));
+            //Log.d("Rotation", Double.toString(flight.velocityY));
+
+            Matrix matrix = new Matrix();
+            matrix.postRotate(flightRotation);
+            Bitmap rotatedBitmap = Bitmap.createBitmap(flight.getFlight(), 0, 0, flight.getFlight().getWidth(), flight.getFlight().getHeight(), matrix, true);
+
+            canvas.drawBitmap(rotatedBitmap, flight.x, flight.y, paint);
 
 
             getHolder().unlockCanvasAndPost(canvas);
