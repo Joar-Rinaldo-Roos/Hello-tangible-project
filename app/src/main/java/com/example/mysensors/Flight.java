@@ -9,10 +9,9 @@ import static com.example.mysensors.GameView.screenRatioX;
 import static com.example.mysensors.GameView.screenRatioY;
 
 public class Flight {
-
     boolean isGoingUp = false, isGoingDown = false, isGoingLeft = false, isGoingRight = false;
     int x, y, width, height;
-    Bitmap flight1, dead;
+    Bitmap flight1, flight2, dead;
     private GameView gameView;
 
     float velocityX, velocityY;
@@ -21,10 +20,17 @@ public class Flight {
     float acceleration = .1f;
 
 
-    Flight(GameView gameView, int screenY, Resources res) {
-        this.gameView = gameView;
 
-        flight1 = BitmapFactory.decodeResource(res, R.drawable.knight1right);
+    Flight(GameView gameView,int x, int y, Resources res,int player) {
+        this.gameView = gameView;
+        this.x = x; // Set the initial X position
+        this.y = y; // Set the initial Y position
+        if (player ==1){
+            flight1 = BitmapFactory.decodeResource(res, R.drawable.knight1right);
+        } else {
+            flight1 = BitmapFactory.decodeResource(res, R.drawable.knight2);
+        }
+
 
         width = flight1.getWidth();
         height = flight1.getHeight();
@@ -37,11 +43,6 @@ public class Flight {
 
         flight1 = Bitmap.createScaledBitmap(flight1, width, height, false);
 
-        dead = BitmapFactory.decodeResource(res, R.drawable.dead);
-        dead = Bitmap.createScaledBitmap(dead, width, height, false);
-
-        y = screenY / 2;
-        x = (int) (64 * screenRatioX);
     }
 
     float lerp(float a, float b, float f)
@@ -77,12 +78,11 @@ public class Flight {
     Bitmap getFlight () {
         return flight1;
     }
+
     Rect getCollisionShape() {
         return new Rect(x, y, x + width, y + height);
     }
 
-    Bitmap getDead() {
-        return dead;
-    }
+
 
 }

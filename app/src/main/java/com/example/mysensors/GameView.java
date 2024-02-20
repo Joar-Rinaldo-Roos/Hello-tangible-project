@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
@@ -11,11 +12,13 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.media.SoundPool;
 import android.os.Build;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceView;
+import android.widget.ImageView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +27,7 @@ import java.util.Random;
 public class GameView extends SurfaceView implements Runnable {
 
     private Thread thread;
+    private MediaPlayer mediaPlayer;
     private boolean isPlaying, isGameOver = false;
     private int screenX, screenY, score = 0;
     public static float screenRatioX, screenRatioY;
@@ -32,7 +36,8 @@ public class GameView extends SurfaceView implements Runnable {
     private Random random;
     private SoundPool soundPool;
     private int sound;
-    private Flight flight;
+    private Flight flight,flight2;
+
     private GameActivity activity;
     private Background background1;
 
@@ -67,7 +72,9 @@ public class GameView extends SurfaceView implements Runnable {
 
         background1 = new Background(screenX, screenY, getResources());
 
-        flight = new Flight(this, screenY, getResources());
+
+        flight = new Flight(this, 100, screenY / 4, getResources(),1); // Spawn at 1/4th Y position
+        flight2 = new Flight(this, 100, 3 * screenY / 4, getResources(),2); // Spawn at 3/4th Y position
 
 
 
@@ -82,37 +89,24 @@ public class GameView extends SurfaceView implements Runnable {
 
     @Override
     public void run() {
+        mediaPlayer = MediaPlayer.create(this.getContext(), R.raw.music);
+        mediaPlayer.start();
 
         while (isPlaying) {
-
             update ();
             draw ();
             sleep ();
-
         }
 
     }
 
     private void update () {
+        flight2.update(); //King elsa denna måste vara först
         flight.update();
-        /*
-        if (flight.isGoingUp)
-            flight.y -= 30 * screenRatioY;
-        else if (flight.isGoingDown)
-            flight.y += 30 * screenRatioY;
-
-        if (flight.y < 0)
-            flight.y = 0;
-
-        if (flight.y >= screenY - flight.height)
-            flight.y = screenY - flight.height;
-
-        if (flight.isGoingLeft)
-            flight.x -= 30 * screenRatioX;
-        else if (flight.isGoingRight)
-            flight.x += 30 * screenRatioX;
-        flight.x = Math.max(0, Math.min(flight.x, screenX - flight.width));
-        */
+        if(Rect.intersects(flight.getCollisionShape(),flight2.getCollisionShape()))
+        {
+            isGameOver = true;
+        }
     }
 
     private void draw () {
@@ -127,21 +121,32 @@ public class GameView extends SurfaceView implements Runnable {
 
             if (isGameOver) {
                 isPlaying = false;
-                canvas.drawBitmap(flight.getDead(), flight.x, flight.y, paint);
+                Bitmap gameOverBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.gameover_transparent);
+                int centerX = (screenX - gameOverBitmap.getWidth()) / 2;
+                int centerY = (screenY - gameOverBitmap.getHeight()) / 2;
+                canvas.drawBitmap(gameOverBitmap, centerX, centerY, null);
                 getHolder().unlockCanvasAndPost(canvas);
                 saveIfHighScore();
                 waitBeforeExiting ();
                 return;
             }
-
             float flightRotation = (float)Math.toDegrees(Math.atan2(flight.lastVelocityY, flight.lastVelocityX));
+            float flightRotation2 = (float)Math.toDegrees(Math.atan2(flight2.lastVelocityY, flight2.lastVelocityX));
+
             //Log.d("Rotation", Double.toString(flight.velocityY));
 
             Matrix matrix = new Matrix();
+            Matrix matrix2 = new Matrix();
+
             matrix.postRotate(flightRotation);
+            matrix2.postRotate(flightRotation2);
+
             Bitmap rotatedBitmap = Bitmap.createBitmap(flight.getFlight(), 0, 0, flight.getFlight().getWidth(), flight.getFlight().getHeight(), matrix, true);
+            Bitmap rotatedBitmap2 = Bitmap.createBitmap(flight2.getFlight(), 0, 0, flight2.getFlight().getWidth(), flight2.getFlight().getHeight(), matrix, true);
 
             canvas.drawBitmap(rotatedBitmap, flight.x, flight.y, paint);
+            canvas.drawBitmap(rotatedBitmap2, flight2.x, flight2.y, paint);
+
 
 
             getHolder().unlockCanvasAndPost(canvas);
@@ -213,18 +218,26 @@ public class GameView extends SurfaceView implements Runnable {
                     // Top-left quadrant for moving up
                     flight.isGoingUp = true;
                     flight.isGoingLeft = true;
+                    flight2.isGoingUp = true;
+                    flight2.isGoingRight = true;
                 } else if (x > screenX / 2 && y < screenY / 2) {
                     // Top-right quadrant for moving up
                     flight.isGoingUp = true;
                     flight.isGoingRight = true;
+                    flight2.isGoingUp = true;
+                    flight2.isGoingRight = true;
                 } else if (x < screenX / 2 && y > screenY / 2) {
                     // Bottom-left quadrant for moving down
                     flight.isGoingDown = true;
                     flight.isGoingLeft = true;
+                    flight2.isGoingDown = true;
+                    flight2.isGoingLeft = true;
                 } else if (x > screenX / 2 && y > screenY / 2) {
                     // Bottom-right quadrant for moving down
                     flight.isGoingDown = true;
                     flight.isGoingRight = true;
+                    flight2.isGoingDown = true;
+                    flight2.isGoingRight = true;
                 }
                 break;
             case MotionEvent.ACTION_UP:
@@ -233,6 +246,10 @@ public class GameView extends SurfaceView implements Runnable {
                 flight.isGoingDown = false;
                 flight.isGoingLeft = false;
                 flight.isGoingRight = false;
+                flight2.isGoingUp = false;
+                flight2.isGoingDown = false;
+                flight2.isGoingLeft = false;
+                flight2.isGoingRight = false;
 
                 // Implement shooting or other actions if necessary
 
