@@ -11,8 +11,8 @@ import static com.example.mysensors.GameView.screenRatioY;
 public class Flight {
 
     boolean isGoingUp = false, isGoingDown = false, isGoingLeft = false, isGoingRight = false;
-    int x, y, width, height, wingCounter = 0, shootCounter = 1;
-    Bitmap flight1, flight2, shoot1, shoot2, shoot3, shoot4, shoot5, dead,flight3,flight4;
+    int x, y, width, height;
+    Bitmap flight1, dead;
     private GameView gameView;
 
     float velocityX, velocityY;
@@ -75,19 +75,6 @@ public class Flight {
     }
 
     Bitmap getFlight () {
-        /*
-        if (isGoingUp) {
-            return flight1;
-        } else if (isGoingDown) {
-            return flight2;
-        } else if (isGoingLeft){
-            return flight3;
-        } else if (isGoingRight){
-            return flight4;
-        } else {
-            return flight1;
-        }
-        */
         return flight1;
     }
     Rect getCollisionShape() {
