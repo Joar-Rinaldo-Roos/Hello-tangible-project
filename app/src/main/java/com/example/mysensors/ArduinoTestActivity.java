@@ -17,7 +17,7 @@ import java.io.UnsupportedEncodingException;
 public class ArduinoTestActivity extends AppCompatActivity implements SensorEventListener {
 
     private MqttAndroidClient client;
-    final String MQTT_HOST = "tcp://broker.hivemq.com:1883";
+    final String MQTT_HOST = "tcp://broker.hivemq.com:8883";
     final String sub_topic = "arduino/in/mamn01/groupD/androidSensor";
     final String pub_topic = "arduino/out/mamn01/groupD/arduinoSensor";
     final String pub_message = "Hello World!";
@@ -30,9 +30,30 @@ public class ArduinoTestActivity extends AppCompatActivity implements SensorEven
         connect();
     }
 
-    public void subscribe(MqttAndroidClient client, String topic) {
+    public void subscribe(MqttAndroidClient client , String topic){
+        int qos = 1;
+        try {
+            IMqttToken subToken = client.subscribe(topic, qos);
+            subToken.setActionCallback(new IMqttActionListener() {
 
+                @Override
+                public void onSuccess(IMqttToken asyncActionToken) {
+                    // The message was published
+                }
+
+                @Override
+                public void onFailure(IMqttToken asyncActionToken,
+                                      Throwable exception) {
+                    // The subscription could not be performed, maybe the user was not
+                    // authorized to subscribe on the specified topic e.g. using wildcards
+
+                }
+            });
+        } catch (MqttException e) {
+            e.printStackTrace();
+        }
     }
+
 
     public void publish(MqttAndroidClient client, String topic, String payload){
         byte[] encodedPayload = new byte[0];
@@ -69,7 +90,11 @@ public class ArduinoTestActivity extends AppCompatActivity implements SensorEven
 
     public void connect(){
         String clientId = MqttClient.generateClientId();
+        Log.d("ClientId", clientId);
         client =  new MqttAndroidClient(this.getApplicationContext(), MQTT_HOST, clientId);
+        Log.d("Client", client.getClientId());
+
+        if (client == null) return;
 
         MqttConnectOptions options = new MqttConnectOptions();
         options.setMqttVersion(MqttConnectOptions.MQTT_VERSION_3_1);
