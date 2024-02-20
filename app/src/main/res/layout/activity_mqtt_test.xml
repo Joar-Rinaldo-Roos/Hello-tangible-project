@@ -6,4 +6,12 @@
     android:layout_height="match_parent"
     tools:context=".MqttTestActivity">
 
+    <TextView
+        android:id="@+id/textview_first"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/textview"
+        tools:layout_editor_absoluteX="165dp"
+        tools:layout_editor_absoluteY="262dp"
+        tools:ignore="MissingConstraints" />
 </androidx.constraintlayout.widget.ConstraintLayout>

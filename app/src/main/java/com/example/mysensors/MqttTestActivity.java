@@ -4,14 +4,15 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.TextView;
 
 import org.eclipse.paho.android.service.MqttAndroidClient;
 import org.eclipse.paho.client.mqttv3.*;
 
 public class MqttTestActivity extends AppCompatActivity {
     final String MQTT_HOST = "tcp://broker.hivemq.com:1883";
-    final String sub_topic = "arduino/in/mamn01/groupD/androidSensor";
-    final String pub_topic = "arduino/out/mamn01/groupD/arduinoSensor";
+    final String sub_topic = "arduino/out/mamn01/groupD/arduinoSensor";
+    final String pub_topic = "arduino/in/mamn01/groupD/arduinoSensor";
     final String pub_message = "Hello World!";
 
     MqttAndroidClient mqttAndroidClient;
@@ -44,6 +45,7 @@ public class MqttTestActivity extends AppCompatActivity {
             });
 
             // Set up message listener
+            /*
             client.setCallback(new MqttCallback() {
                 @Override
                 public void connectionLost(Throwable cause) {
@@ -59,9 +61,11 @@ public class MqttTestActivity extends AppCompatActivity {
 
                 @Override
                 public void deliveryComplete(IMqttDeliveryToken token) {
+                    Log.d("YOOO", "YPPPPPP");
                     // Not used in this example
                 }
             });
+            */
         } catch (MqttException e) {
             e.printStackTrace();
         }
@@ -80,7 +84,23 @@ public class MqttTestActivity extends AppCompatActivity {
                 public void onSuccess(IMqttToken asyncActionToken) {
                     Log.d("Success!", "WOOOOOO!!!");
                     subscribe(mqttAndroidClient, sub_topic);
-                    subscribe(mqttAndroidClient,"bmp");
+                    mqttAndroidClient.setCallback(new MqttCallback() {
+                        TextView tt = (TextView) findViewById(R.id.textview_first);
+                        @Override
+                        public void connectionLost(Throwable cause) {
+
+                        }
+                        @Override
+                        public void messageArrived(String topic, MqttMessage message) throws Exception {
+                            Log.d("file", message.toString());
+                            tt.setText(message.toString());
+
+                        }
+                        @Override
+                        public void deliveryComplete(IMqttDeliveryToken token) {
+
+                        }
+                    });
                 }
 
                 @Override
