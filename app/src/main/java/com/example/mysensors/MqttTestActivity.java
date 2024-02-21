@@ -43,29 +43,6 @@ public class MqttTestActivity extends AppCompatActivity {
                     Log.d("Subscribe", "Subscription failed!");
                 }
             });
-
-            // Set up message listener
-            /*
-            client.setCallback(new MqttCallback() {
-                @Override
-                public void connectionLost(Throwable cause) {
-                    Log.d("MQTT", "Connection lost!");
-                }
-
-                @Override
-                public void messageArrived(String topic, MqttMessage message) throws Exception {
-                    // Called when a message arrives on the subscribed topic
-                    String payload = new String(message.getPayload());
-                    Log.d("MQTT", "Message received on topic: " + topic + ", message: " + payload);
-                }
-
-                @Override
-                public void deliveryComplete(IMqttDeliveryToken token) {
-                    Log.d("YOOO", "YPPPPPP");
-                    // Not used in this example
-                }
-            });
-            */
         } catch (MqttException e) {
             e.printStackTrace();
         }
