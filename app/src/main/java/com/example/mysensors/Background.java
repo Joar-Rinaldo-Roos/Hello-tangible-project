@@ -11,7 +11,7 @@ public class Background {
 
     Background (int screenX, int screenY, Resources res) {
 
-        background = BitmapFactory.decodeResource(res, R.drawable.castle_bg);
+        background = BitmapFactory.decodeResource(res, R.drawable.castlebg);
         background = Bitmap.createScaledBitmap(background, screenX, screenY, false);
 
     }
