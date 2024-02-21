@@ -30,7 +30,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
         final SharedPreferences prefs = getSharedPreferences("game", MODE_PRIVATE);
 
         isMute = prefs.getBoolean("isMute", false);

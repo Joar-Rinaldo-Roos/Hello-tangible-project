@@ -41,13 +41,16 @@ public class GameView extends SurfaceView implements Runnable {
     private GameActivity activity;
     private Background background1;
 
-    public GameView(GameActivity activity, int screenX, int screenY) {
+    private MqttController mqttController;
+
+    public GameView(GameActivity activity, int screenX, int screenY, Context context) {
         super(activity);
 
         this.activity = activity;
 
         prefs = activity.getSharedPreferences("game", Context.MODE_PRIVATE);
 
+        mqttController = new MqttController(context);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 
@@ -76,8 +79,6 @@ public class GameView extends SurfaceView implements Runnable {
         flight = new Flight(this, 100, screenY / 4, getResources(),1); // Spawn at 1/4th Y position
         flight2 = new Flight(this, 100, 3 * screenY / 4, getResources(),2); // Spawn at 3/4th Y position
 
-
-
         paint = new Paint();
         paint.setTextSize(128);
         paint.setColor(Color.WHITE);
@@ -101,8 +102,23 @@ public class GameView extends SurfaceView implements Runnable {
     }
 
     private void update () {
+        Log.d("Arduino values:", mqttController.values);
+
+        String values = mqttController.values;
+        Log.d("Joystick info:", values);
+
+        if (!values.equals("")) {
+            String[] splitValues = values.split(" ");
+
+            flight.joyValX = Float.parseFloat(splitValues[1]);
+            flight.joyValY = Float.parseFloat(splitValues[2]);
+            flight2.joyValX = Float.parseFloat(splitValues[0]);
+            flight2.joyValY = Float.parseFloat(splitValues[3]);
+        }
+
         flight2.update(); //King elsa denna måste vara först
         flight.update();
+        /*
         if(Rect.intersects(flight.getCollisionShape(),flight2.getCollisionShape()))
         {
             isGameOver = true;
@@ -110,9 +126,11 @@ public class GameView extends SurfaceView implements Runnable {
         if(Rect.intersects(flight.getSwordCollisionShape(), flight2.getSwordCollisionShape())) {
             bounceBack(flight, flight2);
 
-            Log.d("SwordCollision", "The swords have collided!");
+            // Log.d("SwordCollision", "The swords have collided!");
         }
+         */
     }
+
     private void bounceBack(Flight flight1, Flight flight2) {
         // Simple bounce back logic: reverse direction and move back a bit
         final float bounceDistance = 50; // Adjust this value as needed
@@ -163,10 +181,9 @@ public class GameView extends SurfaceView implements Runnable {
                 waitBeforeExiting ();
                 return;
             }
+
             float flightRotation = (float)Math.toDegrees(Math.atan2(flight.lastVelocityY, flight.lastVelocityX));
             float flightRotation2 = (float)Math.toDegrees(Math.atan2(flight2.lastVelocityY, flight2.lastVelocityX));
-
-            //Log.d("Rotation", Double.toString(flight.velocityY));
 
             Matrix matrix = new Matrix();
             Matrix matrix2 = new Matrix();
@@ -237,6 +254,7 @@ public class GameView extends SurfaceView implements Runnable {
 
     }
 
+    /*
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         int action = event.getAction();
@@ -291,6 +309,6 @@ public class GameView extends SurfaceView implements Runnable {
 
         return true;
     }
-
+     */
 
 }

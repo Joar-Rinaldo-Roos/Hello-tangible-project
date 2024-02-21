@@ -19,6 +19,10 @@ public class Flight {
     float maxSpeed = 20;
     float acceleration = .1f;
 
+    int center = 65;
+    int deadzone = 5;
+
+    public float joyValX, joyValY;
 
 
     Flight(GameView gameView,int x, int y, Resources res,int player) {
@@ -52,13 +56,20 @@ public class Flight {
         return value;
     }
 
+    float clamp(float value, float min, float max) {
+        return Math.max(min, Math.min(max, value));
+    }
+
     void update() {
-        if (isGoingUp) velocityY = lerp(velocityY, -maxSpeed * screenRatioY, acceleration); // Example movement speed, adjust as needed
-        if (isGoingDown) velocityY = lerp(velocityY, maxSpeed * screenRatioY, acceleration);
-        if (isGoingLeft) velocityX = lerp(velocityX, -maxSpeed * screenRatioX, acceleration);
-        if (isGoingRight) velocityX = lerp(velocityX, maxSpeed * screenRatioX, acceleration);
-        if (!isGoingUp || !isGoingDown || !isGoingLeft || !isGoingRight) {
+        if (joyValY > center + deadzone) velocityY = lerp(velocityY, -maxSpeed * screenRatioY, acceleration); // Example movement speed, adjust as needed
+        if (joyValY < center - deadzone) velocityY = lerp(velocityY, maxSpeed * screenRatioY, acceleration);
+        if (joyValX < center - deadzone) velocityX = lerp(velocityX, -maxSpeed * screenRatioX, acceleration);
+        if (joyValX > center + deadzone) velocityX = lerp(velocityX, maxSpeed * screenRatioX, acceleration);
+        if (joyValX == clamp(joyValX, center - deadzone, center + deadzone) ) {
             velocityX = lerp(velocityX, 0, acceleration);
+        }
+
+        if (joyValY == clamp(joyValY, center - deadzone, center + deadzone)) {
             velocityY = lerp(velocityY, 0, acceleration);
         }
 
