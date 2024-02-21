@@ -107,7 +107,40 @@ public class GameView extends SurfaceView implements Runnable {
         {
             isGameOver = true;
         }
+        if(Rect.intersects(flight.getSwordCollisionShape(), flight2.getSwordCollisionShape())) {
+            bounceBack(flight, flight2);
+
+            Log.d("SwordCollision", "The swords have collided!");
+        }
     }
+    private void bounceBack(Flight flight1, Flight flight2) {
+        // Simple bounce back logic: reverse direction and move back a bit
+        final float bounceDistance = 50; // Adjust this value as needed
+
+        // Reverse velocities
+        flight1.velocityX *= -1;
+        flight1.velocityY *= -1;
+        flight2.velocityX *= -1;
+        flight2.velocityY *= -1;
+
+        // Move knights back to avoid stickiness
+        flight1.x += Math.signum(flight1.velocityX) * bounceDistance;
+        flight1.y += Math.signum(flight1.velocityY) * bounceDistance;
+        flight2.x += Math.signum(flight2.velocityX) * bounceDistance;
+        flight2.y += Math.signum(flight2.velocityY) * bounceDistance;
+
+        // Ensure they are not moved outside of the screen bounds
+        flight1.x = Math.max(flight1.x, 0);
+        flight1.x = Math.min(flight1.x, screenX - flight1.width);
+        flight1.y = Math.max(flight1.y, 0);
+        flight1.y = Math.min(flight1.y, screenY - flight1.height);
+
+        flight2.x = Math.max(flight2.x, 0);
+        flight2.x = Math.min(flight2.x, screenX - flight2.width);
+        flight2.y = Math.max(flight2.y, 0);
+        flight2.y = Math.min(flight2.y, screenY - flight2.height);
+    }
+
 
     private void draw () {
 
@@ -158,7 +191,7 @@ public class GameView extends SurfaceView implements Runnable {
     private void waitBeforeExiting() {
 
         try {
-            Thread.sleep(3000);
+            Thread.sleep(1000);
             activity.startActivity(new Intent(activity, MainActivity.class));
             activity.finish();
         } catch (InterruptedException e) {
