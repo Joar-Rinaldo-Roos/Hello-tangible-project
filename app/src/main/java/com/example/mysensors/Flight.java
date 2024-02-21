@@ -83,6 +83,17 @@ public class Flight {
         return new Rect(x, y, x + width, y + height);
     }
 
+    // Add method in Flight class to get the sword's collision shape
+    Rect getSwordCollisionShape() {
+        int swordOffsetX = width - (width / 4); // Example offset, adjust according to your sprite
+        int swordOffsetY = height / 4; // Adjust as needed
+        int swordWidth = width / 4; // Assuming sword width is a quarter of the knight's width
+        int swordHeight = (3 * height) / 4; // Assuming sword height is three-quarters of the knight's height
+
+        return new Rect(x + swordOffsetX, y + swordOffsetY, x + swordOffsetX + swordWidth, y + swordOffsetY + swordHeight);
+    }
+
+
 
 
 }
