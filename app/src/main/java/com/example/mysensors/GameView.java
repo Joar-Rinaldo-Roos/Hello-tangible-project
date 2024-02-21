@@ -29,7 +29,7 @@ public class GameView extends SurfaceView implements Runnable {
     private Thread thread;
     private MediaPlayer mediaPlayer;
     private boolean isPlaying, isGameOver = false;
-    private int screenX, screenY, score = 0;
+    private int screenX, screenY;
     public static float screenRatioX, screenRatioY;
     private Paint paint;
     private SharedPreferences prefs;
@@ -75,9 +75,8 @@ public class GameView extends SurfaceView implements Runnable {
 
         background1 = new Background(screenX, screenY, getResources());
 
-
-        flight = new Flight(this, 100, screenY / 4, getResources(),1); // Spawn at 1/4th Y position
-        flight2 = new Flight(this, 100, 3 * screenY / 4, getResources(),2); // Spawn at 3/4th Y position
+        flight = new Flight(this, screenX / 4, screenY / 4, getResources(),1); // Spawn at 1/4th Y position
+        flight2 = new Flight(this, screenX - screenX / 4, screenY / 4 - screenY / 4 , getResources(),2); // Spawn at 3/4th Y position
 
         paint = new Paint();
         paint.setTextSize(128);
@@ -102,8 +101,6 @@ public class GameView extends SurfaceView implements Runnable {
     }
 
     private void update () {
-        Log.d("Arduino values:", mqttController.values);
-
         String values = mqttController.values;
         Log.d("Joystick info:", values);
 
@@ -118,7 +115,7 @@ public class GameView extends SurfaceView implements Runnable {
 
         flight2.update(); //King elsa denna måste vara först
         flight.update();
-        /*
+
         if(Rect.intersects(flight.getCollisionShape(),flight2.getCollisionShape()))
         {
             isGameOver = true;
@@ -128,7 +125,6 @@ public class GameView extends SurfaceView implements Runnable {
 
             // Log.d("SwordCollision", "The swords have collided!");
         }
-         */
     }
 
     private void bounceBack(Flight flight1, Flight flight2) {
@@ -167,9 +163,6 @@ public class GameView extends SurfaceView implements Runnable {
             Canvas canvas = getHolder().lockCanvas();
             canvas.drawBitmap(background1.background, background1.x, background1.y, paint);
 
-
-            canvas.drawText(score + "", screenX / 2f, 164, paint);
-
             if (isGameOver) {
                 isPlaying = false;
                 Bitmap gameOverBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.gameover_transparent);
@@ -177,7 +170,6 @@ public class GameView extends SurfaceView implements Runnable {
                 int centerY = (screenY - gameOverBitmap.getHeight()) / 2;
                 canvas.drawBitmap(gameOverBitmap, centerX, centerY, null);
                 getHolder().unlockCanvasAndPost(canvas);
-                saveIfHighScore();
                 waitBeforeExiting ();
                 return;
             }
@@ -192,12 +184,10 @@ public class GameView extends SurfaceView implements Runnable {
             matrix2.postRotate(flightRotation2);
 
             Bitmap rotatedBitmap = Bitmap.createBitmap(flight.getFlight(), 0, 0, flight.getFlight().getWidth(), flight.getFlight().getHeight(), matrix, true);
-            Bitmap rotatedBitmap2 = Bitmap.createBitmap(flight2.getFlight(), 0, 0, flight2.getFlight().getWidth(), flight2.getFlight().getHeight(), matrix, true);
+            Bitmap rotatedBitmap2 = Bitmap.createBitmap(flight2.getFlight(), 0, 0, flight2.getFlight().getWidth(), flight2.getFlight().getHeight(), matrix2, true);
 
             canvas.drawBitmap(rotatedBitmap, flight.x, flight.y, paint);
             canvas.drawBitmap(rotatedBitmap2, flight2.x, flight2.y, paint);
-
-
 
             getHolder().unlockCanvasAndPost(canvas);
 
@@ -213,16 +203,6 @@ public class GameView extends SurfaceView implements Runnable {
             activity.finish();
         } catch (InterruptedException e) {
             e.printStackTrace();
-        }
-
-    }
-
-    private void saveIfHighScore() {
-
-        if (prefs.getInt("highscore", 0) < score) {
-            SharedPreferences.Editor editor = prefs.edit();
-            editor.putInt("highscore", score);
-            editor.apply();
         }
 
     }
